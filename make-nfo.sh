@@ -2,7 +2,7 @@
 
 # usage
 usage() {
-  echo "Usage: $0 -x /path/to/file.xml -s /where/the/video/lives -d /write/nfo/here" 1>&2
+  echo "Usage: $0 -x /path/to/file.xml -s /path/to/file.mp4 -d /write/nfo/here" 1>&2
   exit 99
 }
 
@@ -30,11 +30,11 @@ do
 done
 shift $((OPTIND-1))
 
-[ -z $dst ] && echo "need -d (directory to write nfo file to)" && exit 99
-[ -z $vidsrc ] && vidsrc="/home/mythtv/football"
-[ -z $xmlinfo ] && echo "need -x (xml info file)" && exit 99
-[ ! -e ${xmlinfo} ] && echo "${xmlinfo} NOT FOUND" && exit 99
-[ ! -e ${vidsrc} ] && echo "${vidsrc} NOT FOUND" && exit 99
+[ -z "${dst}" ] && echo "need -d (directory to write nfo file to)" && exit 99
+[ -z "${vidsrc}" ] && echo "need -s (mp4 file)" && exit 99
+[ -z "${xmlinfo}" ] && echo "need -x (xml info file)" && exit 99
+[ ! -e "${xmlinfo}" ] && echo "${xmlinfo} NOT FOUND" && exit 99
+[ ! -e "${vidsrc}" ] && echo "${vidsrc} NOT FOUND" && exit 99
 
 mediainfo=$( which mediainfo )
 
@@ -54,16 +54,17 @@ then
   rm -f /tmp/descr.$$
 fi
 
-if [ ! -e "${vidsrc}/${basename}" ]
+
+if [ ! -e "${vidsrc}" ]
 then
-  echo "${vidsrc}/${basename} NOT FOUND"
+  echo "${vidsrc} NOT FOUND"
   echo "Not generating video/audio info"
 else
-  if [ ! -z $mediainfo ]
+  if [ ! -z "${mediainfo}" ]
   then
-    videoinfo="$( $mediainfo --Output=JSON $vidsrc/$basename | jq '.media.track[] | select(."@type"=="Video") | {FrameRate,FrameRate_Mode,Width,Height,DisplayAspectRatio,Encoded_Library}' )"
-    audioinfo="$( $mediainfo --Output=JSON $vidsrc/$basename | jq '.media.track[] | select(."@type"=="Audio") | {Format,CodecID,BitRate,BitRate_Mode,Language,Channels,ChannelPositions}' )"
-    ccinfo="$( $mediainfo --Output=JSON $vidsrc/$basename | jq '.media.track[] | select(."@type"=="Text") | {Format,CodecID,Language,Forced}' )"
+    videoinfo="$( $mediainfo --Output=JSON $vidsrc | jq '.media.track[] | select(."@type"=="Video") | {FrameRate,FrameRate_Mode,Width,Height,DisplayAspectRatio,Encoded_Library}' )"
+    audioinfo="$( $mediainfo --Output=JSON $vidsrc | jq '.media.track[] | select(."@type"=="Audio") | {Format,CodecID,BitRate,BitRate_Mode,Language,Channels,ChannelPositions}' )"
+    ccinfo="$( $mediainfo --Output=JSON $vidsrc | jq '.media.track[] | select(."@type"=="Text") | {Format,CodecID,Language,Forced}' )"
 
     cat <<EOF >> /tmp/vfo.$$
 
@@ -77,6 +78,7 @@ Closed Caption info:
 $ccinfo
 
 EOF
+
   fi
 fi
 
