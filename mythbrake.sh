@@ -89,7 +89,7 @@ echo $( date ) >> $log
 
 #announce="udp://tracker.yoshi210.com:6969/announce"
 announce="udp://172.27.228.2:6969/announce"
-torrentout="/home/mythtv/torrent/$OUTFILE"
+torrentout="/home/mythtv/torrent/$( echo $OUTFILE | sed 's:mp4:torrent:' )"
 mktorrent=$(which mktorrent)
 
 echo ""
