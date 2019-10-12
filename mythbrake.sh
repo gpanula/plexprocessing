@@ -91,7 +91,7 @@ then
   echo "mktorrent NOT FOUND"
 else
   echo "mktorrent -v -a $announce -n $OUTFILE -l 22 -o $torrentout $output"
-  $mktorrent -v -a $announce -n $OUTFILE -l 22 -o $torrentout $( echo $output | sed 's:mp4:torrent' )
+  $mktorrent -v -a $announce -n $OUTFILE -l 22 -o $torrentout $output
 fi
 
 echo ""
