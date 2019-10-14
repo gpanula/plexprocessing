@@ -30,8 +30,8 @@ uploaddir="/home/whale/rutorrent/downloads/watched"
 # yes, there is a bug in the current mythbrake.sh script
 for x in $( find $mythtorrent -type f )
 do
-  src="$( echo $x | sed 's:torrent:football:')"
-  tgt="$( echo $x | awk -F/ '{ print $NF }')"
+  src="$( echo $x | sed 's:torrent:football:' | sed 's:torrent:mp4:' )"
+  tgt="$( echo $x | awk -F/ '{ print $NF }' | sed 's:torrent:mp4:')"
   torrent="$( echo $tgt | sed 's:mp4:torrent:')"
   xmlinfo="$( echo $tgt | sed 's:mp4:xml:')"
   nfo="$( echo $tgt | sed 's:mp4:nfo:')"
