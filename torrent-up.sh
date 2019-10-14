@@ -36,39 +36,39 @@ do
   xmlinfo="$( echo $tgt | sed 's:mp4:xml:')"
   nfo="$( echo $tgt | sed 's:mp4:nfo:')"
   xmlquery="select title,subtitle,description,basename,DATE_FORMAT(starttime, '%Y-%b-%d') from recorded where basename = '$tgt';"
-
+  
   # some older files will be in the default folder
   if [ ! -e "$src" ]
   then
     echo "$src missing, switching to default folder"
     src="$( echo $s | sed 's:torrent:default:')"
   fi
-
+  
   # check to see if the symlink exists
   if [ ! -e "$download/$tgt" ]
   then
     echo "symlink $download/$tgt doesn't exist"
     ln -s $src $download/$tgt
   fi
-
+  
   # check for existing torrent
   if [ ! -e $watch/$torrent ]
   then
     # create torrent
     echo "creating a torrent for $src"
-    echo "$mktorrent -v -a $tracker -n $tgt -l 22 -o $watch/$torrent $src"
-    $mktorrent -v -a $tracker -n $tgt -l 22 -o $watch/$torrent $src
+    echo "nice -n 5 $mktorrent -v -a $tracker -n $tgt -l 22 -o $watch/$torrent $src"
+    nice -n 5 $mktorrent -v -a $tracker -n $tgt -l 22 -o $watch/$torrent $src
     [ $? -gt 0 ] && echo Error creating torrent file && exit 99
     scp -P $sshport $watch/$torrent $nexthop:$uploaddir/${torrent}
   fi
-
+  
   # generate xml info
   if [ ! -e "${watch}/${xmlinfo}" ] && [ ! -z $mysql ]
   then
     # create the xml info
     $mysql $mysqlconn -X -e "${xmlquery}" > $watch/$xmlinfo
     [ -e "${watch}/${xmlinfo}" ] && scp -P $sshport ${watch}/${xmlinfo} $nexthop:$uploaddir/${xmlinfo}
-
+    
     if [ ! -z "${makenfo}" ]
     then
       # make nfo
@@ -76,6 +76,8 @@ do
       [ -e "${watch}/${nfo}" ] && scp -P $sshport ${watch}/${nfo} $nexthop:$uploaddir/${nfo}
     fi
   fi
-
-
+  
+  
 done
+
+exit 0
