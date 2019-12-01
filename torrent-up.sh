@@ -23,7 +23,7 @@ mysqlconn="-u mythtv -pmythtv -D mythconverg"
 tracker="udp://172.27.228.2:6969/announce"
 
 sshport="4242"
-nexthop="marge.kablah.com"
+nexthop="nntpup.smurf.work"
 uploaddir="/home/whale/rutorrent/downloads/watched"
 
 # create symlinks to file based on what is found in the myth torrent directory
@@ -41,7 +41,12 @@ do
   if [ ! -e "$src" ]
   then
     echo "$src missing, switching to default folder"
-    src="$( echo $s | sed 's:torrent:default:')"
+    src="$( echo $src | sed 's:football:default:' )"
+    if [ ! -e "$src" ]
+    then
+      echo "$src missing, bailing out"
+      exit 99
+    fi
   fi
   
   # check to see if the symlink exists
