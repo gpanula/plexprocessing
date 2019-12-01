@@ -31,7 +31,7 @@ audio_track="$( $mediainfo --Output=JSON $input | jq -r '.media.track[] | select
 framerate="$( $mediainfo --Output=JSON $input | jq -r '.media.track[] | select(."@type"=="Video") | .FrameRate' | cut -c1-5 )"
 
 echo "" >> $log
-echo "Version: 2019-10-03 21:30" >> $log
+echo "Version: 2019-11-30 23:31" >> $log
 echo "input: $input" >> $log
 echo "output: $output" >> $log
 echo "chanid: $CHANID" >> $log
@@ -77,26 +77,34 @@ echo ""
 echo "Transcoding started at $( date )" >> $log
 #script -a -c 'nice -n 10 $handbrakecli $handbrake_options -i "${input}" -o "${output}" 2>&1' ${log}
 nice -n 10 $handbrakecli -Z "${preset}" $handbrake_options -i "${input}" -o "${output}" >> ${log} 2>&1
-echo "Transcodeing completed at$( date )" >> $log
+echo "Transcoding completed at: $( date )" >> $log
+
+if [ -s ${output} ]
+then
+  # the output exists and is non-zero in size
+  # delete the input file
+  echo "deleting ${input}" >> $log
+  rm -f ${input}
+fi
 
 announce="udp://172.27.228.2:6969/announce"
 torrentout="/home/mythtv/torrent/$( echo $OUTFILE | sed 's:mp4:torrent:' )"
 mktorrent=$(which mktorrent)
 
-echo ""
-echo "Now creating torrent file for $output"
+echo "" >> $log
+echo "Now creating torrent file for $output" >> $log
 
 if [ -z "${mktorrent}" ]
 then
-  echo "mktorrent NOT FOUND"
+  echo "mktorrent NOT FOUND" >> $log
 else
-  echo "mktorrent -v -a $announce -n $OUTFILE -l 22 -o $torrentout $output"
+  echo "mktorrent -v -a $announce -n $OUTFILE -l 22 -o $torrentout $output" >> $log
   $mktorrent -v -a $announce -n $OUTFILE -l 22 -o $torrentout $output
 fi
 
-echo ""
-echo "Now attempting to update mythconverg"
-echo ""
+echo "" >> $log
+echo "Now attempting to update mythconverg" >> $log
+echo "" >> $log
 
 if [ -z "${CHANID}" ]
 then
